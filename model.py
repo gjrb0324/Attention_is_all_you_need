@@ -145,9 +145,9 @@ class Multi_head(nn.Module):
         else:
             num_batch = prev_seq.size(0)
 
-        result = torch.tensor([])
+        result = torch.tensor([]).to('cuda')
         for j in range(num_batch):
-            concatted = torch.tensor([])
+            concatted = torch.tensor([]).to('cuda')
             for i in range(config.num_head):
                 q =  torch.mm(prev_seq[j,:,:], self.Wq[i,:,:])
                 if self.mode == 2:
@@ -184,7 +184,7 @@ class Scaled_Dot_Product(nn.Module):
             #present words, not coming words.
             #Create masking matrix: from left-below to diagonal: 0, else : -inf
             minus_inf_mask = torch.triu(torch.ones(out.size(0), out.size(0)),\
-                                        diagonal=1)
+                                        diagonal=1).to('cuda')
             #Sum out and masking matrix
             out = out + minus_inf_mask
         out = self.softmax(out)

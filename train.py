@@ -51,7 +51,7 @@ def get_batch(source, i, bptt) :
     target = source[i+1: i+1+seq_len].reshape(-1)
     return data, target
 
-def compute_lr(step_num, optimizer=None):
+def compute_ir(step_num, optimizer=None):
     lr = (config.dim_model ** -0.5) * \
         min(step_num ** -0.5, step_num * \
                     (config.warmup_steps ** -1.5))
@@ -83,7 +83,7 @@ def train(net, train_data, ntokens, optimizer, bptt, epoch, device):
         tq.set_postfix(mini_batch_loss = fmt(loss))
         global step_num
         step_num += 1
-        compute_lr(step_num, optimizer)
+        #compute_lr(step_num, optimizer)
         writer.add_scalar("Loss/train", loss, step_num-1)
 
 def evaluate(net, eval_data, bptt, epoch, device):
@@ -127,21 +127,25 @@ def main():
     bptt = 35
 
     ntokens = len(vocab)
-    net = model.Transformer(ntokens).to(device)
+    net = nn.Transformer().to(device)
+    #model.Transformer(ntokens).to(device)
 
     global step_num
     step_num= 1
-    initial_lr = compute_lr(step_num)
+    #initial_lr = compute_lr(step_num)
     optimizer = torch.optim.Adam([p for p in net.parameters() \
                                   if p.requires_grad], \
-                                 lr = initial_lr, betas = (0.9,0.98), \
+                                 lr = 5.0, betas = (0.9,0.98), \
                                  eps = 1e-09)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1.0, \
+            gamma = 0.95)
     best_val_loss = float('inf')
     best_model = None
 
     for epoch in range(1, config.epochs+1):
         train(net, train_data, ntokens, optimizer, bptt, epoch, device)
         evaluate(net, eval_data, bptt, epoch, device)
+        scheduler.step()
 
 
 if __name__ == '__main__':

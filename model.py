@@ -17,13 +17,11 @@ class Transformer(nn.Module):
         super().__init__()
         self.linear = nn.Linear(config.dim_model, num_tokens)
         init.xavier_uniform_(self.linear.weight)
-        global shared_weight
-        shared_weight = self.linear.weight
 
         #Share same weight matrix between two embedding layers
         #and the pre-softmax linear transformation
-        self.encoder = Encoder(num_tokens)
-        self.decoder = Decoder(num_tokens)
+        self.encoder = Encoder(num_tokens, self.linear.weight)
+        self.decoder = Decoder(num_tokens, self.linear.weight)
         self.softmax = nn.Softmax(dim=-1)
 
     def forward(self,encoded_input, encoded_output):
@@ -35,15 +33,17 @@ class Transformer(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, num_tokens):
+    def __init__(self, num_tokens, shared_weight =None, need_mask=False):
         super().__init__()
         self.ffn = Feed_Forward()
-        self.mha = Multi_head(0)
+        self.mha = Multi_head(0, need_mask)
 
         #Sharing embedding weight with linear fc's weight
         self.embedding = nn.Embedding(num_tokens,config.dim_model)
-        global shared_weight
-        self.embedding.weight = shared_weight
+        if shared_weight is not None:
+            self.embedding.weight = shared_weight
+        else :
+            init.xavier_uniform_(self.embedding.weight)
         self.positional = PositionalEncodding()
         self.layer_norm = nn.LayerNorm(config.dim_model)
 
@@ -65,7 +65,7 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, num_tokens):
+    def __init__(self, num_tokens, shared_weight = None):
         super().__init__()
         self.ffn = Feed_Forward()
         self.mha1 = Multi_head(1)
@@ -73,8 +73,10 @@ class Decoder(nn.Module):
 
         #Sharing Embedding weight with encoder's embedidng weight, linear fc's weight
         self.embedding = nn.Embedding(num_tokens, config.dim_model)
-        global shared_weight
-        self.embedding.weight = shared_weight
+        if shared_wieght is None:
+            self.embedding.weight = shared_weight
+        else :
+            init.xavier_uniform_(self.embedding.weight)
 
         self.positional = PositionalEncodding()
         self.layer_norm = nn.LayerNorm(config.dim_model)
@@ -99,14 +101,15 @@ class Decoder(nn.Module):
         return result
 
 class Multi_head(nn.Module):
-    def __init__(self,mode):
+    def __init__(self,mode, need_mask = False):
         super().__init__()
         '''
         There are three types of multi head-attention,
         0. Self(Encoder), 1. Self(Decoder), 2.Encoder_Decoder
         Those number above are given through 'mode' variable.
         '''
-        need_mask = True if mode==1 else False
+        if mode==1:
+            need_mask=True
         self.mode = mode
         self.scaled_dot = Scaled_Dot_Product(dec_dec=need_mask)
         self.linear = nn.Linear(config.num_head * config.dim_v, \

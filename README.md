@@ -30,3 +30,6 @@ python test.py
 ![image](https://user-images.githubusercontent.com/48676255/156733181-77f0e3b0-a225-438e-b3fa-6b29e9726b70.png)
 ![image](https://user-images.githubusercontent.com/48676255/156733214-3a961c0c-facd-4060-b2e9-dc58ac46c5f9.png)
 
+### 5. Challenges
+- Setting appropriate learning rate for Adam is difficult...
+- I can't understand why the paper trained with too small learning rate

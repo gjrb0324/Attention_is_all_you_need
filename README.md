@@ -10,6 +10,7 @@
 use command below
 
 ``` python test.py
+```
 
 ### 3. Accuracies and loss
 

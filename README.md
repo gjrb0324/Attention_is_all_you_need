@@ -11,6 +11,17 @@ use command below
 
 python test.py
 
+### Accuracies and loss
+
+#### Reproduced(model.py) Trnasformer model Training loss 
+![image](https://user-images.githubusercontent.com/48676255/156733761-56c2cf84-0145-49b3-899e-77a29419cbc1.png)
+##### Green : with SGD optimizer
+##### Blue : with Adam optimizer
+
+#### Transformer from torch.nn VS Reproduced model
+![image](https://user-images.githubusercontent.com/48676255/156734013-6141bdcd-0cb6-4b58-91d3-f430e7b4ccc4.png)
+##### Green : nn.Transformers with Adam Optimizer
+##### Blue : Reproduced model with Adam Optimizer
 
 ### Sample Result
 ![image](https://user-images.githubusercontent.com/48676255/156733141-6c5f0544-c398-4d46-884c-479cb2b36f04.png)

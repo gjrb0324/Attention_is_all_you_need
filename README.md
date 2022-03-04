@@ -9,7 +9,7 @@
 ### 2. How to run
 use command below
 
-python test.py
+``` python test.py
 
 ### 3. Accuracies and loss
 

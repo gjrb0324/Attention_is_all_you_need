@@ -164,15 +164,23 @@ def evaluate(model: nn.Module, eval_data: Tensor) -> float:
                 src_mask = src_mask[:batch_size, :batch_size]
             output = model(data, src_mask)
             max_index = output.max(dim=-1)[1]
-            for i in range(35):
-                print('predicted answer : {}, answer: {}\n'.format(list_vocab[int(max_index[i][0])], \
-                        list_vocab[int(targets[i*10])]))
+            m,n = max_index.size() 
+            print_targets = targets.view(m,n)
+
+            max_index = torch.transpose(max_index, 0,1)
+            print_targets = torch.transpose(print_targets, 0,1)
+
+            for j in range(n):
+                for k in range(m):
+                    print('predicted answer : {}, answer: {}\n'.format(list_vocab[int(max_index[j][k])], \
+                            list_vocab[int(print_targets[j][k])]))
+                input("Continue? Press Enter\n")
             output_flat = output.view(-1, ntokens)
             total_loss += batch_size * criterion(output_flat, targets).item()
     return total_loss / (len(eval_data) - 1)
 
 best_val_loss = float('inf')
-epochs = 3
+epochs = 100
 best_model = None
 
 for epoch in range(1, epochs + 1):
